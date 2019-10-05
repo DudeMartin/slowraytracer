@@ -42,6 +42,14 @@ public final class Pixmap {
         return bufferedImage;
     }
 
+    public int width() {
+        return width;
+    }
+
+    public int height() {
+        return height;
+    }
+
     @FunctionalInterface
     public interface Mapper {
 

@@ -12,6 +12,11 @@ final class Validations {
         return value;
     }
 
+    static float requirePositive(final float value, final String valueName) {
+        assertPositive(value > 0, valueName);
+        return value;
+    }
+
     static boolean checkRange(final int value, final int startInclusive, final int endExclusive) {
         return value >= startInclusive && value < endExclusive;
     }
