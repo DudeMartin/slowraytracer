@@ -6,10 +6,12 @@ public final class Sphere {
 
     private final Vector3 center;
     private final float radius;
+    private final Material material;
 
-    public Sphere(final Vector3 center, final float radius) {
+    public Sphere(final Vector3 center, final float radius, final Material material) {
         this.center = Objects.requireNonNull(center);
         this.radius = Validations.requirePositive(radius, "radius");
+        this.material = Objects.requireNonNull(material);
     }
 
     public boolean intersects(final Ray ray) {
@@ -33,5 +35,9 @@ public final class Sphere {
         }
         final var t1 = tca + thc;
         return t1 >= 0;
+    }
+
+    public Material material() {
+        return material;
     }
 }
