@@ -1,0 +1,8 @@
+plugins {
+    id 'java'
+}
+
+group 'martin'
+version '0.1'
+
+sourceCompatibility = 11
