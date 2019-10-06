@@ -41,14 +41,6 @@ public final class Sphere {
         return List.of();
     }
 
-    public boolean intersects(final Ray ray) {
-        return !intersections(ray).isEmpty();
-    }
-
-    public Material material() {
-        return material;
-    }
-
     public final class RayIntersection {
 
         private final float distance;
@@ -71,6 +63,10 @@ public final class Sphere {
 
         public Vector3 normal() {
             return normal;
+        }
+
+        public Material material() {
+            return material;
         }
     }
 }
