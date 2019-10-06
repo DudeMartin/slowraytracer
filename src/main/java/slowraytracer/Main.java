@@ -43,7 +43,7 @@ public final class Main {
         for (var y = 0; y < height; y++) {
             for (var x = 0; x < width; x++) {
                 final var directionX = (x + 0.5f) - halfWidth;
-                final var directionY = (y + 0.5f) - halfHeight;
+                final var directionY = -(y + 0.5f) + halfHeight;
                 final var viewDirection = new Vector3(directionX, directionY, directionZ).normalize();
                 final var colorOptional = castRay(new Ray(Vector3.ZERO, viewDirection), sphere);
                 if (colorOptional.isPresent()) {
