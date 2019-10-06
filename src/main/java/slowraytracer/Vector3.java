@@ -15,6 +15,14 @@ public final class Vector3 {
         this.z = z;
     }
 
+    public Vector3 multiply(final float constant) {
+        return new Vector3(x * constant, y * constant, z * constant);
+    }
+
+    public Vector3 add(final Vector3 other) {
+        return new Vector3(x + other.x, y + other.y, z + other.z);
+    }
+
     public Vector3 subtract(final Vector3 other) {
         return new Vector3(x - other.x, y - other.y, z - other.z);
     }
@@ -28,8 +36,7 @@ public final class Vector3 {
     }
 
     public Vector3 normalize() {
-        final var normFactor = 1 / norm();
-        return new Vector3(x * normFactor, y * normFactor, z * normFactor);
+        return multiply(1 / norm());
     }
 
     public float x() {
