@@ -3,6 +3,7 @@ package slowraytracer;
 import java.awt.Color;
 import java.io.File;
 import java.io.IOException;
+import java.util.List;
 import java.util.Optional;
 import java.util.Random;
 import java.util.stream.Collectors;
@@ -18,8 +19,12 @@ public final class Main {
         final var imageWidth = 800;
         final var imageHeight = 600;
         final var pixmap = new Pixmap(imageWidth, imageHeight);
+        final var sceneSpheres = Stream.generate(Main::generateSphere).limit(5).collect(Collectors.toList());
+        final var sceneLights = List.of(
+                new PointLight(Vector3.ZERO, 0.25f),
+                new PointLight(new Vector3(-10, 10, 10), 1.1f));
         pixmap.fill((x, y) -> Color.LIGHT_GRAY.getRGB());
-        renderSpheres(pixmap, Stream.generate(Main::generateSphere).limit(5).collect(Collectors.toList()));
+        renderScene(pixmap, sceneSpheres, sceneLights);
         ImageIO.write(pixmap.asBufferedImage(), "png", new File("out.png"));
     }
 
@@ -35,7 +40,10 @@ public final class Main {
         return new Sphere(new Vector3(x, y, z), radius, new Material(diffuseColor.getRGB()));
     }
 
-    private static void renderSpheres(final Pixmap pixmap, final Iterable<Sphere> spheres) {
+    private static void renderScene(
+            final Pixmap pixmap,
+            final Iterable<Sphere> spheres,
+            final Iterable<PointLight> lights) {
         final var width = pixmap.width();
         final var halfWidth = width / 2;
         final var height = pixmap.height();
@@ -46,10 +54,9 @@ public final class Main {
                 final var directionX = (x + 0.5f) - halfWidth;
                 final var directionY = -(y + 0.5f) + halfHeight;
                 final var viewDirection = new Vector3(directionX, directionY, directionZ).normalize();
-                final var colorOptional = castRay(new Ray(Vector3.ZERO, viewDirection), spheres)
-                        .map(intersection -> intersection.material().diffuseColor());
-                if (colorOptional.isPresent()) {
-                    pixmap.set(x, y, colorOptional.get());
+                final var intersectionOptional = castRay(new Ray(Vector3.ZERO, viewDirection), spheres);
+                if (intersectionOptional.isPresent()) {
+                    pixmap.set(x, y, diffuseLighting(intersectionOptional.get(), lights));
                 }
             }
         }
@@ -68,5 +75,14 @@ public final class Main {
             }
         }
         return closestIntersection;
+    }
+
+    private static int diffuseLighting(final Sphere.RayIntersection intersection, final Iterable<PointLight> lights) {
+        var intensity = 0f;
+        for (final PointLight light : lights) {
+            final var lightDirection = light.position().subtract(intersection.position()).normalize();
+            intensity += light.intensity() * Math.max(0, lightDirection.dotProduct(intersection.normal()));
+        }
+        return ColorUtilities.scaleOpaqueArgb(intersection.material().diffuseColor(), intensity);
     }
 }
