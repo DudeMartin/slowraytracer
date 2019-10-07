@@ -84,7 +84,7 @@ public final class Main {
         var intensity = 0f;
         for (final PointLight light : lights) {
             final var lightDirection = light.position().subtract(intersection.position()).normalize();
-            intensity += light.intensity() * Math.max(0, lightDirection.dotProduct(intersection.normal()));
+            intensity += light.intensity() * LightingCalculations.diffuse(lightDirection, intersection.normal());
         }
         return ColorUtilities.scaleOpaqueArgb(intersection.material().diffuseColor(), intensity);
     }
