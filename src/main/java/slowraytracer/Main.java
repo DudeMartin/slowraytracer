@@ -25,7 +25,7 @@ public final class Main {
                 new PointLight(new Vector3(-10, 10, 10), 1.1f));
         pixmap.fill((x, y) -> Color.LIGHT_GRAY.getRGB());
         renderScene(pixmap, sceneSpheres, sceneLights);
-        ImageIO.write(pixmap.asBufferedImage(), "png", new File("out.png"));
+        System.exit(ImageIO.write(pixmap.asBufferedImage(), "png", new File("out.png")) ? 0 : 1);
     }
 
     private static Sphere generateSphere() {
