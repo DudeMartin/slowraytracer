@@ -32,4 +32,15 @@ public final class ColorUtilities {
     public static int toOpaqueArgb(final float red, final float green, final float blue) {
         return toOpaqueArgb((int) (red * 255), (int) (green * 255), (int) (blue * 255));
     }
+
+    public static int toOpaqueArgb(final Vector3 colorVector) {
+        return toOpaqueArgb(
+                normalize((int) colorVector.x()),
+                normalize((int) colorVector.y()),
+                normalize((int) colorVector.z()));
+    }
+
+    public static Vector3 toOpaqueVector(final int argb) {
+        return new Vector3(redComponent(argb), greenComponent(argb), blueComponent(argb));
+    }
 }

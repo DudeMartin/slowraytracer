@@ -65,7 +65,7 @@ public final class Main {
                 final var viewRay = ImmutableRay.of(Vector3.ZERO, viewDirection);
                 final var intersectionOptional = castRay(viewRay, spheres);
                 if (intersectionOptional.isPresent()) {
-                    pixmap.set(x, y, computeLighting(viewRay, intersectionOptional.get(), lights));
+                    pixmap.set(x, y, computeColor(viewRay, intersectionOptional.get(), lights));
                 }
             }
         }
@@ -86,11 +86,13 @@ public final class Main {
         return closestIntersection;
     }
 
-    private static int computeLighting(
+    private static int computeColor(
             final Ray ray,
             final Sphere.RayIntersection intersection,
             final Iterable<? extends PointLight> lights) {
         final var material = intersection.material();
+        final var ambient = ColorUtilities.toOpaqueVector(material.ambientColor())
+                .multiply(material.ambientIntensity());
         var diffuseIntensity = 0f;
         var specularIntensity = 0f;
         for (final PointLight light : lights) {
@@ -104,23 +106,8 @@ public final class Main {
                     ray.direction(),
                     material.shininess());
         }
-        final var ambient = argbToVector(material.ambientColor()).multiply(material.ambientIntensity());
-        final var diffuse = argbToVector(material.diffuseColor()).multiply(diffuseIntensity);
-        final var specular = argbToVector(material.specularColor()).multiply(specularIntensity);
-        return vectorToArgb(ambient.add(diffuse).add(specular));
-    }
-
-    private static Vector3 argbToVector(final int argb) {
-        return new Vector3(
-                ColorUtilities.redComponent(argb),
-                ColorUtilities.greenComponent(argb),
-                ColorUtilities.blueComponent(argb));
-    }
-
-    private static int vectorToArgb(final Vector3 vectorArgb) {
-        return ColorUtilities.toOpaqueArgb(
-                ColorUtilities.normalize((int) vectorArgb.x()),
-                ColorUtilities.normalize((int) vectorArgb.y()),
-                ColorUtilities.normalize((int) vectorArgb.z()));
+        final var diffuse = ColorUtilities.toOpaqueVector(material.diffuseColor()).multiply(diffuseIntensity);
+        final var specular = ColorUtilities.toOpaqueVector(material.specularColor()).multiply(specularIntensity);
+        return ColorUtilities.toOpaqueArgb(ambient.add(diffuse).add(specular));
     }
 }
