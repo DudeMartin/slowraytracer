@@ -1,22 +1,13 @@
 package slowraytracer;
 
-import java.util.Objects;
+import org.immutables.value.Value;
 
-public final class Ray {
+@Value.Immutable(builder = false)
+public interface Ray {
 
-    private final Vector3 endpoint;
-    private final Vector3 direction;
+    @Value.Parameter
+    Vector3 endpoint();
 
-    public Ray(final Vector3 endpoint, final Vector3 direction) {
-        this.endpoint = Objects.requireNonNull(endpoint);
-        this.direction = Objects.requireNonNull(direction);
-    }
-
-    public Vector3 endpoint() {
-        return endpoint;
-    }
-
-    public Vector3 direction() {
-        return direction;
-    }
+    @Value.Parameter
+    Vector3 direction();
 }

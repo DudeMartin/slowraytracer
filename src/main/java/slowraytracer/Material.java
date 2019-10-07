@@ -1,57 +1,46 @@
 package slowraytracer;
 
-public final class Material {
+import org.immutables.value.Value;
 
-    private final int ambientColor;
-    private final float ambientIntensity;
-    private final int diffuseColor;
-    private final float diffuseIntensity;
-    private final int specularColor;
-    private final float specularIntensity;
-    private final float shininess;
+@Value.Immutable
+public abstract class Material {
 
-    public Material(
-            final int ambientColor,
-            final float ambientIntensity,
-            final int diffuseColor,
-            final float diffuseIntensity,
-            final int specularColor,
-            final float specularIntensity,
-            final float shininess)  {
-        this.ambientColor = ambientColor;
-        this.ambientIntensity = Validations.requireNonNegative(ambientIntensity, "ambient intensity");
-        this.diffuseColor = diffuseColor;
-        this.diffuseIntensity = Validations.requireNonNegative(diffuseIntensity, "diffuse intensity");
-        this.specularColor = specularColor;
-        this.specularIntensity = Validations.requireNonNegative(specularIntensity, "specular intensity");
-        this.shininess = Validations.requireNonNegative(shininess, "shininess");
-    }
+    private static final int WHITE_ARGB = ColorUtilities.toOpaqueArgb(255, 255, 255);
 
-    public int ambientColor() {
-        return ambientColor;
-    }
+    public abstract int ambientColor();
 
-    public float ambientIntensity() {
-        return ambientIntensity;
-    }
+    public abstract float ambientIntensity();
 
+    @Value.Default
     public int diffuseColor() {
-        return diffuseColor;
+        return ambientColor();
     }
 
+    @Value.Default
     public float diffuseIntensity() {
-        return diffuseIntensity;
+        return 0;
     }
 
+    @Value.Default
     public int specularColor() {
-        return specularColor;
+        return WHITE_ARGB;
     }
 
+    @Value.Default
     public float specularIntensity() {
-        return specularIntensity;
+        return 0;
     }
 
+    @Value.Default
     public float shininess() {
-        return shininess;
+        return 0;
+    }
+
+    @Value.Check
+    void checkInputs() {
+        Validations.requireNonNegative(ambientIntensity(), "ambient intensity");
+        Validations.requireNonNegative(diffuseIntensity(), "diffuse intensity");
+        Validations.requireNonNegative(specularIntensity(), "specular intensity");
+        Validations.requireNonNegative(shininess(), "shininess");
     }
 }

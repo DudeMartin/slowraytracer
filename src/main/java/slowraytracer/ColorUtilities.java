@@ -28,4 +28,8 @@ public final class ColorUtilities {
     public static int toOpaqueArgb(final int red, final int green, final int blue) {
         return toArgb(255, red, green, blue);
     }
+
+    public static int toOpaqueArgb(final float red, final float green, final float blue) {
+        return toOpaqueArgb((int) (red * 255), (int) (green * 255), (int) (blue * 255));
+    }
 }

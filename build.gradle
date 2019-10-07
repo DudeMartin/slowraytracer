@@ -6,3 +6,14 @@ group 'martin'
 version '0.1'
 
 sourceCompatibility = 11
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    // The Immutables library is quite nice for avoiding a lot of the boilerplate when creating classes to represent
+    // immutable things.
+    annotationProcessor 'org.immutables:value:2.8.0'
+    implementation 'org.immutables:value-annotations:2.8.0'
+}
