@@ -15,10 +15,10 @@ public final class Pixmap {
         data = new int[width * height];
     }
 
-    public void set(final int x, final int y, final int color) {
+    public void set(final int x, final int y, final int argb) {
         Validations.requireRange(x, 0, width, "X-coordinate");
         Validations.requireRange(y, 0, height, "Y-coordinate");
-        data[x + y * width] = color;
+        data[x + y * width] = argb;
     }
 
     public void fill(final Mapper mapper) {

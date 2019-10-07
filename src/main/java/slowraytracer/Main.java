@@ -37,7 +37,10 @@ public final class Main {
         final var y = (down ? -RANDOM.nextFloat() : RANDOM.nextFloat()) * 3 * halfRadius;
         final var z = -5.1f + halfRadius;
         final var diffuseColor = new Color(RANDOM.nextFloat(), RANDOM.nextFloat(), RANDOM.nextFloat());
-        return new Sphere(new Vector3(x, y, z), radius, new Material(diffuseColor.getRGB()));
+        return new Sphere(
+                new Vector3(x, y, z),
+                radius,
+                new Material(Color.WHITE.getRGB(), 0, diffuseColor.getRGB(), 1, Color.WHITE.getRGB(), 0, 0));
     }
 
     private static void renderScene(

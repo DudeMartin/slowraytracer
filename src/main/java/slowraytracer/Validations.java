@@ -8,12 +8,17 @@ final class Validations {
     }
 
     static int requirePositive(final int value, final String valueName) {
-        assertPositive(value > 0, valueName);
+        assertCondition(value > 0, valueName, "positive");
         return value;
     }
 
     static float requirePositive(final float value, final String valueName) {
-        assertPositive(value > 0, valueName);
+        assertCondition(value > 0, valueName, "positive");
+        return value;
+    }
+
+    static float requireNonNegative(final float value, final String valueName) {
+        assertCondition(value >= 0, valueName, "non-negative");
         return value;
     }
 
@@ -37,10 +42,11 @@ final class Validations {
         }
     }
 
-    private static void assertPositive(final boolean condition, final String valueName) {
+    private static void assertCondition(final boolean condition, final String valueName, final String conditionName) {
         Objects.requireNonNull(valueName);
+        Objects.requireNonNull(conditionName);
         if (!condition) {
-            throw new IllegalArgumentException("The " + valueName + " must be positive.");
+            throw new IllegalArgumentException(String.format("The %s must be %s.", valueName, conditionName));
         }
     }
 }
