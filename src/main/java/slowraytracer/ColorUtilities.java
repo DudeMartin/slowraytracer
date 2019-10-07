@@ -5,10 +5,6 @@ public final class ColorUtilities {
     private ColorUtilities() {
     }
 
-    public static int alphaComponent(final int argb) {
-        return (argb & 0xff000000) >>> 24;
-    }
-
     public static int redComponent(final int argb) {
         return (argb & 0xff0000) >>> 16;
     }
@@ -31,12 +27,5 @@ public final class ColorUtilities {
 
     public static int toOpaqueArgb(final int red, final int green, final int blue) {
         return toArgb(255, red, green, blue);
-    }
-
-    public static int scaleOpaqueArgb(final int argb, final float factor) {
-        final var redScaled = (int) (redComponent(argb) * factor);
-        final var greenScaled = (int) (greenComponent(argb) * factor);
-        final var blueScaled = (int) (blueComponent(argb) * factor);
-        return toOpaqueArgb(normalize(redScaled), normalize(greenScaled), normalize(blueScaled));
     }
 }

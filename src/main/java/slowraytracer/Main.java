@@ -81,11 +81,26 @@ public final class Main {
     }
 
     private static int diffuseLighting(final Sphere.RayIntersection intersection, final Iterable<PointLight> lights) {
+        final var material = intersection.material();
         var intensity = 0f;
         for (final PointLight light : lights) {
             final var lightDirection = light.position().subtract(intersection.position()).normalize();
             intensity += light.intensity() * LightingCalculations.diffuse(lightDirection, intersection.normal());
         }
-        return ColorUtilities.scaleOpaqueArgb(intersection.material().diffuseColor(), intensity);
+        return vectorToArgb(argbToVector(material.diffuseColor()).multiply(intensity));
+    }
+
+    private static Vector3 argbToVector(final int argb) {
+        return new Vector3(
+                ColorUtilities.redComponent(argb),
+                ColorUtilities.greenComponent(argb),
+                ColorUtilities.blueComponent(argb));
+    }
+
+    private static int vectorToArgb(final Vector3 vectorArgb) {
+        return ColorUtilities.toOpaqueArgb(
+                ColorUtilities.normalize((int) vectorArgb.x()),
+                ColorUtilities.normalize((int) vectorArgb.y()),
+                ColorUtilities.normalize((int) vectorArgb.z()));
     }
 }
