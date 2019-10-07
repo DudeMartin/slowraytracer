@@ -15,6 +15,10 @@ public final class Vector3 {
         this.z = z;
     }
 
+    public Vector3 negate() {
+        return new Vector3(-x, -y, -z);
+    }
+
     public Vector3 multiply(final float constant) {
         return new Vector3(x * constant, y * constant, z * constant);
     }
