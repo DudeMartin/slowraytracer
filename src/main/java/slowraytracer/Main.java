@@ -40,7 +40,7 @@ public final class Main {
         return new Sphere(
                 new Vector3(x, y, z),
                 radius,
-                new Material(Color.WHITE.getRGB(), 0, diffuseColor.getRGB(), 1, Color.WHITE.getRGB(), 0, 0));
+                new Material(diffuseColor.getRGB(), 0.1f, diffuseColor.getRGB(), 0.8f, Color.WHITE.getRGB(), 0.5f, 50));
     }
 
     private static void renderScene(
@@ -57,9 +57,10 @@ public final class Main {
                 final var directionX = (x + 0.5f) - halfWidth;
                 final var directionY = -(y + 0.5f) + halfHeight;
                 final var viewDirection = new Vector3(directionX, directionY, directionZ).normalize();
-                final var intersectionOptional = castRay(new Ray(Vector3.ZERO, viewDirection), spheres);
+                final var viewRay = new Ray(Vector3.ZERO, viewDirection);
+                final var intersectionOptional = castRay(viewRay, spheres);
                 if (intersectionOptional.isPresent()) {
-                    pixmap.set(x, y, diffuseLighting(intersectionOptional.get(), lights));
+                    pixmap.set(x, y, computeLighting(viewRay, intersectionOptional.get(), lights));
                 }
             }
         }
@@ -80,14 +81,28 @@ public final class Main {
         return closestIntersection;
     }
 
-    private static int diffuseLighting(final Sphere.RayIntersection intersection, final Iterable<PointLight> lights) {
+    private static int computeLighting(
+            final Ray ray,
+            final Sphere.RayIntersection intersection,
+            final Iterable<PointLight> lights) {
         final var material = intersection.material();
-        var intensity = 0f;
+        var diffuseIntensity = 0f;
+        var specularIntensity = 0f;
         for (final PointLight light : lights) {
             final var lightDirection = light.position().subtract(intersection.position()).normalize();
-            intensity += light.intensity() * LightingCalculations.diffuse(lightDirection, intersection.normal());
+            diffuseIntensity += light.intensity() * material.diffuseIntensity() * LightingCalculations.diffuse(
+                    lightDirection,
+                    intersection.normal());
+            specularIntensity += light.intensity() * material.specularIntensity() * LightingCalculations.specular(
+                    lightDirection,
+                    intersection.normal(),
+                    ray.direction(),
+                    material.shininess());
         }
-        return vectorToArgb(argbToVector(material.diffuseColor()).multiply(intensity));
+        final var ambient = argbToVector(material.ambientColor()).multiply(material.ambientIntensity());
+        final var diffuse = argbToVector(material.diffuseColor()).multiply(diffuseIntensity);
+        final var specular = argbToVector(material.specularColor()).multiply(specularIntensity);
+        return vectorToArgb(ambient.add(diffuse).add(specular));
     }
 
     private static Vector3 argbToVector(final int argb) {
