@@ -14,8 +14,7 @@ final class LightingCalculations {
             final Vector3 normal,
             final Vector3 viewDirection,
             final float shininess) {
-        final var reflection = reflect(lightDirection.negate(), normal).negate();
-        return (float) Math.pow(Math.max(0, reflection.dotProduct(viewDirection)), shininess);
+        return (float) Math.pow(Math.max(0, reflect(lightDirection, normal).dotProduct(viewDirection)), shininess);
     }
 
     private static Vector3 reflect(final Vector3 lightDirection, final Vector3 normal) {
