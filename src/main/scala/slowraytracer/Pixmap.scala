@@ -9,6 +9,10 @@ class Pixmap(width: Int, height: Int) {
 
   private val data: Array[Int] = new Array[Int](width * height)
 
+  def width(): Int = width
+
+  def height(): Int = height
+
   def set(x: Int, y: Int, argb: Int): Unit = {
     Validations.assertRange(x, 0, width, "X-coordinate")
     Validations.assertRange(y, 0, height, "Y-coordinate")

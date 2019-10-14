@@ -14,6 +14,12 @@ class PixmapSpec extends FlatSpec {
     assertThrows[IllegalArgumentException] { new Pixmap(1, 0) }
   }
 
+  "width and height" should "return width and height values" in {
+    val pixmap = new Pixmap(1, 2)
+    assertResult(1) { pixmap.width() }
+    assertResult(2) { pixmap.height() }
+  }
+
   "set" should "throw IllegalArgumentException when coordinates are out of bounds" in {
     val pixmap = new Pixmap(1, 1)
     assertThrows[IllegalArgumentException] { pixmap.set(-1, 0, 0) }
