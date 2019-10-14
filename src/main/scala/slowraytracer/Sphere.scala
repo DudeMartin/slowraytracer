@@ -1,8 +1,8 @@
 package slowraytracer
 
-case class Sphere(center: Vector3, radius: Float) {
+case class Sphere(center: Vector3, radius: Float) extends SceneObject {
 
-  def intersections(ray: Ray): List[RayIntersection] = {
+  override def intersections(ray: Ray): List[RayIntersection] = {
     val L = center - ray.endpoint
     val tca = L * ray.direction.normalize
     if (tca < 0) {
@@ -18,22 +18,17 @@ case class Sphere(center: Vector3, radius: Float) {
     val t1 = tca + thc
     if (t0 >= 0) {
       if (t1 >= 0) {
-        List(RayIntersection(ray, t0), RayIntersection(ray, t1))
+        List(SphereIntersection(ray, t0), SphereIntersection(ray, t1))
       } else {
-        List(RayIntersection(ray, t0))
+        List(SphereIntersection(ray, t0))
       }
     } else {
       List.empty
     }
   }
 
-  case class RayIntersection private (ray: Ray, distance: Float) {
+  private case class SphereIntersection(ray: Ray, distance: Float) extends RayIntersection {
 
-    private val positionComputed = ray.endpoint + (ray.direction * distance)
-    private val normalComputed = (position - center).normalize
-
-    def position: Vector3 = positionComputed
-
-    def normal: Vector3 = normalComputed
+    override def normal: Vector3 = (position - center).normalize
   }
 }

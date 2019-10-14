@@ -7,11 +7,13 @@ object Application {
     import javax.imageio.ImageIO
     val pixmap = new Pixmap(800, 600)
     pixmap.fill((_, _) => 0xffa0b0c0)
-    renderSphere(pixmap, Sphere(Vector3(-2, 0, -8), 4))
+    renderScene(pixmap, Scene.mutable
+      .withObject(Sphere(Vector3(-2, 0, -8), 4))
+      .withObject(Sphere(Vector3(6, -1, -10), 3)))
     sys.exit(if (ImageIO.write(pixmap.asBufferedImage, "png", new File("out.png"))) 0 else 1)
   }
 
-  private def renderSphere(pixmap: Pixmap, sphere: Sphere): Unit = {
+  private def renderScene(pixmap: Pixmap, scene: Scene): Unit = {
     val cameraPosition = Vector3.ZERO
     val fovRadians = Math.toRadians(90)
     val width = pixmap.width()
@@ -24,7 +26,8 @@ object Application {
         val directionX = (x + 0.5f) - halfWidth
         val directionY = -(y + 0.5f) + halfHeight
         val viewDirection = Vector3(directionX, directionY, directionZ)
-        if (sphere.intersections(Ray(cameraPosition, viewDirection)).nonEmpty) {
+        val viewRay = Ray(cameraPosition, viewDirection)
+        if (scene.objects.exists(sceneObject => sceneObject.intersections(viewRay).nonEmpty)) {
           pixmap.set(x, y, 0xffffa000)
         }
       }
