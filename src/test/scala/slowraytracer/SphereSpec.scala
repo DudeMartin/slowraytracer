@@ -4,8 +4,8 @@ import org.scalatest.FlatSpec
 
 class SphereSpec extends FlatSpec {
 
-  "intersections" should "return an empty list when the ray misses the sphere" in {
-    assertResult(List()) { Sphere(Vector3(3, 3, 3), 3).intersections(Ray(Vector3.ZERO, Vector3(0, 3, 0))) }
+  "intersections" should "return an empty sequence when the ray misses the sphere" in {
+    assertResult(Seq()) { Sphere(Vector3(3, 3, 3), 3).intersections(Ray(Vector3.ZERO, Vector3(0, 3, 0))) }
   }
 
   "intersections" should "return one intersection when the ray is tangent to the sphere" in {
