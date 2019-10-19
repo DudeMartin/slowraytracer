@@ -10,7 +10,8 @@ object Application {
     pixmap.fill((_, _) => Color.LIGHT_GRAY)
     renderScene(pixmap, Scene.buildable
       .withObject(Sphere(Vector3(-2, 0, -8), 4, orangeMaterial))
-      .withObject(Sphere(Vector3(6, -1, -10), 3, orangeMaterial)))
+      .withObject(Sphere(Vector3(6, -1, -10), 3, orangeMaterial))
+      .withPointLight(PointLight(Vector3(-10, 10, -10), 1)))
     sys.exit(if (ImageIO.write(pixmap.asBufferedImage, "png", new File("out.png"))) 0 else 1)
   }
 
@@ -28,11 +29,12 @@ object Application {
         val directionY = -(y + 0.5f) + halfHeight
         val viewDirection = Vector3(directionX, directionY, directionZ)
         val viewRay = Ray(cameraPosition, viewDirection)
-        scene.objects
-          .flatMap(_.intersections(viewRay))
-          .map(_.material.ambientColor)
-          .foreach(ambientColor => pixmap.set(x, y, ambientColor.color * ambientColor.intensity))
+        scene.objects.flatMap(_.intersections(viewRay)).map(computeColor(_, scene)).foreach(pixmap.set(x, y, _))
       }
     }
+  }
+
+  private def computeColor(intersection: RayIntersection, scene: Scene) = {
+    intersection.material.ambientColor.color * intersection.material.ambientColor.intensity
   }
 }
