@@ -21,7 +21,7 @@ object Application {
     val halfWidth = width / 2f
     val height = pixmap.height()
     val halfHeight = height / 2f
-    val directionZ = -halfHeight / Math.tan(fovRadians / 2).asInstanceOf[Float]
+    val directionZ = -halfHeight / Math.tan(fovRadians / 2).toFloat
     for (y <- 0 until height) {
       for (x <- 0 until width) {
         val directionX = (x + 0.5f) - halfWidth

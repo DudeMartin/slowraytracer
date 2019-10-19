@@ -13,7 +13,7 @@ case class Sphere(center: Vector3, radius: Float, material: Material) extends Sc
     if (d2 > radiusSquared) {
       return Seq.empty
     }
-    val thc = Math.sqrt(radiusSquared - d2).asInstanceOf[Float]
+    val thc = Math.sqrt(radiusSquared - d2).toFloat
     val t0 = tca - thc
     val t1 = tca + thc
     if (t0 >= 0) {

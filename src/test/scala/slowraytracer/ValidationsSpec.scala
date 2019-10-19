@@ -17,8 +17,8 @@ class ValidationsSpec extends FlatSpec {
   }
 
   "assertRange" should "throw IllegalArgumentException when value is out of range" in {
-    val startInclusive = -2;
-    val endExclusive = 3;
+    val startInclusive = -2
+    val endExclusive = 3
     assertThrows[IllegalArgumentException] { Validations.assertRange(-4, startInclusive, endExclusive, "value") }
     assertThrows[IllegalArgumentException] { Validations.assertRange(-3, startInclusive, endExclusive, "value") }
     assertThrows[IllegalArgumentException] { Validations.assertRange(3, startInclusive, endExclusive, "value") }

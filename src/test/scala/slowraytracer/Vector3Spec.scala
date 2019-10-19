@@ -27,11 +27,11 @@ class Vector3Spec extends FlatSpec {
   }
 
   "norm" should "return the norm of the vector" in {
-    assertResult(Math.sqrt(56).asInstanceOf[Float]) { Vector3(2, 4, 6).norm }
+    assertResult(Math.sqrt(56).toFloat) { Vector3(2, 4, 6).norm }
   }
 
   "normalize" should "return the normalized version of the vector" in {
-    val norm = Math.sqrt(56).asInstanceOf[Float]
+    val norm = Math.sqrt(56).toFloat
     assertResult(Vector3(2 / norm, 4 / norm, 6 / norm)) { Vector3(2, 4, 6).normalize }
   }
 }

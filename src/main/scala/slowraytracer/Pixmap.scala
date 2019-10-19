@@ -16,7 +16,7 @@ class Pixmap(width: Int, height: Int) {
   def set(x: Int, y: Int, color: Color): Unit = {
     Validations.assertRange(x, 0, width, "X-coordinate")
     Validations.assertRange(y, 0, height, "Y-coordinate")
-    data(x + y * width) = color;
+    data(x + y * width) = color
   }
 
   def fill(mapper: (Int, Int) => Color): Unit = {

@@ -1,6 +1,6 @@
 package slowraytracer
 
-abstract class RayIntersection {
+trait RayIntersection {
 
   def ray: Ray
 

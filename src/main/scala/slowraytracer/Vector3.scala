@@ -12,9 +12,9 @@ case class Vector3(x: Float, y: Float, z: Float) {
 
   def *(other: Vector3): Float = x * other.x + y * other.y + z * other.z
 
-  def norm: Float = Math.sqrt(this * this).asInstanceOf[Float]
+  def norm: Float = Math.sqrt(this * this).toFloat
 
-  def normalize: Vector3 = this / norm;
+  def normalize: Vector3 = this / norm
 }
 
 case object Vector3 {
