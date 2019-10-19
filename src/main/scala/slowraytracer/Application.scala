@@ -7,7 +7,7 @@ object Application {
     import javax.imageio.ImageIO
     val pixmap = new Pixmap(800, 600)
     pixmap.fill((_, _) => 0xffa0b0c0)
-    renderScene(pixmap, Scene.mutable
+    renderScene(pixmap, Scene.buildable
       .withObject(Sphere(Vector3(-2, 0, -8), 4))
       .withObject(Sphere(Vector3(6, -1, -10), 3)))
     sys.exit(if (ImageIO.write(pixmap.asBufferedImage, "png", new File("out.png"))) 0 else 1)
