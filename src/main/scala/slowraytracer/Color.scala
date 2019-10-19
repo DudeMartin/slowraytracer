@@ -21,7 +21,8 @@ case object Color {
 
   final val BLACK = of(0, 0, 0)
   final val LIGHT_GRAY = of(192, 192, 192)
-  final val ORANGE = of(255, 165, 0)
+  final val ORANGE = of(255, 200, 0)
+  final val MAGENTA = of(255, 0, 255)
 
   def of(alpha: Int, red: Int, green: Int, blue: Int): Color = Color(toArgb(alpha, red, green, blue))
 
