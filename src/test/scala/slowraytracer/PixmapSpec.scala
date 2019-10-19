@@ -22,10 +22,10 @@ class PixmapSpec extends FlatSpec {
 
   "set" should "throw IllegalArgumentException when coordinates are out of bounds" in {
     val pixmap = new Pixmap(1, 1)
-    assertThrows[IllegalArgumentException] { pixmap.set(-1, 0, 0) }
-    assertThrows[IllegalArgumentException] { pixmap.set(1, 0, 0) }
-    assertThrows[IllegalArgumentException] { pixmap.set(0, -1, 0) }
-    assertThrows[IllegalArgumentException] { pixmap.set(0, 1, 0) }
+    assertThrows[IllegalArgumentException] { pixmap.set(-1, 0, Color.BLACK) }
+    assertThrows[IllegalArgumentException] { pixmap.set(1, 0, Color.BLACK) }
+    assertThrows[IllegalArgumentException] { pixmap.set(0, -1, Color.BLACK) }
+    assertThrows[IllegalArgumentException] { pixmap.set(0, 1, Color.BLACK) }
   }
 
   "get" should "throw IllegalArgumentException when coordinates are out of bounds" in {
@@ -38,19 +38,19 @@ class PixmapSpec extends FlatSpec {
 
   "set then get" should "return the value assigned by the set operation" in {
     val pixmap = new Pixmap(1, 1)
-    assertResult(1337) {
-      pixmap.set(0, 0, 1337)
+    assertResult(Color.ORANGE) {
+      pixmap.set(0, 0, Color.ORANGE)
       pixmap.get(0, 0)
     }
   }
 
   "fill then asBufferedImage" should "return a BufferedImage whose values were set by the fill operation" in {
     val pixmap = new Pixmap(2, 2)
-    pixmap.fill(_ + 2 * _)
+    pixmap.fill((x, y) => if (x % 2 == 0) Color.ORANGE else Color.LIGHT_GRAY)
     val bufferedImage = pixmap.asBufferedImage
-    assertResult(0) { bufferedImage.getRGB(0, 0) }
-    assertResult(1) { bufferedImage.getRGB(1, 0) }
-    assertResult(2) { bufferedImage.getRGB(0, 1) }
-    assertResult(3) { bufferedImage.getRGB(1, 1) }
+    assertResult(Color.ORANGE.argb) { bufferedImage.getRGB(0, 0) }
+    assertResult(Color.LIGHT_GRAY.argb) { bufferedImage.getRGB(1, 0) }
+    assertResult(Color.ORANGE.argb) { bufferedImage.getRGB(0, 1) }
+    assertResult(Color.LIGHT_GRAY.argb) { bufferedImage.getRGB(1, 1) }
   }
 }

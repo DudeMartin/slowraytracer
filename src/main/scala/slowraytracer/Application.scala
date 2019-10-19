@@ -6,7 +6,7 @@ object Application {
     import java.io.File
     import javax.imageio.ImageIO
     val pixmap = new Pixmap(800, 600)
-    pixmap.fill((_, _) => 0xffa0b0c0)
+    pixmap.fill((_, _) => Color.LIGHT_GRAY)
     renderScene(pixmap, Scene.buildable
       .withObject(Sphere(Vector3(-2, 0, -8), 4))
       .withObject(Sphere(Vector3(6, -1, -10), 3)))
@@ -28,7 +28,7 @@ object Application {
         val viewDirection = Vector3(directionX, directionY, directionZ)
         val viewRay = Ray(cameraPosition, viewDirection)
         if (scene.objects.exists(sceneObject => sceneObject.intersections(viewRay).nonEmpty)) {
-          pixmap.set(x, y, 0xffffa000)
+          pixmap.set(x, y, Color.ORANGE)
         }
       }
     }
