@@ -9,4 +9,6 @@ abstract class RayIntersection {
   def position: Vector3 = ray.endpoint + (ray.direction * distance)
 
   def normal: Vector3
+
+  def material: Material
 }

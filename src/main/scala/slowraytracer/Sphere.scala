@@ -1,6 +1,6 @@
 package slowraytracer
 
-case class Sphere(center: Vector3, radius: Float) extends SceneObject {
+case class Sphere(center: Vector3, radius: Float, material: Material) extends SceneObject {
 
   override def intersections(ray: Ray): Seq[RayIntersection] = {
     val L = center - ray.endpoint
@@ -30,5 +30,7 @@ case class Sphere(center: Vector3, radius: Float) extends SceneObject {
   private case class SphereIntersection(ray: Ray, distance: Float) extends RayIntersection {
 
     override def normal: Vector3 = (position - center).normalize
+
+    override def material: Material = Sphere.this.material
   }
 }

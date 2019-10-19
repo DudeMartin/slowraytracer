@@ -4,13 +4,15 @@ import org.scalatest.FlatSpec
 
 class SphereSpec extends FlatSpec {
 
+  private val testSphere = Sphere(Vector3(3, 3, 3), 3, Material(MaterialColor(Color.BLACK, 1)))
+
   "intersections" should "return an empty sequence when the ray misses the sphere" in {
-    assertResult(Seq()) { Sphere(Vector3(3, 3, 3), 3).intersections(Ray(Vector3.ZERO, Vector3(0, 3, 0))) }
+    assertResult(Seq()) { testSphere.intersections(Ray(Vector3.ZERO, Vector3(0, 3, 0))) }
   }
 
   "intersections" should "return one intersection when the ray is tangent to the sphere" in {
     assert {
-      val intersections = Sphere(Vector3(3, 3, 3), 3).intersections(Ray(Vector3.ZERO, Vector3(3, 3, 0)))
+      val intersections = testSphere.intersections(Ray(Vector3.ZERO, Vector3(3, 3, 0)))
       if (intersections.isEmpty) {
         true
       } else {
@@ -23,6 +25,6 @@ class SphereSpec extends FlatSpec {
   }
 
   "intersections" should "return two intersections when the ray passes through the sphere" in {
-    assertResult(2) { Sphere(Vector3(3, 3, 3), 3).intersections(Ray(Vector3.ZERO, Vector3(1, 1, 1))).size }
+    assertResult(2) { testSphere.intersections(Ray(Vector3.ZERO, Vector3(1, 1, 1))).size }
   }
 }
