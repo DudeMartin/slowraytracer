@@ -15,6 +15,8 @@ case class Color private (argb: Int) {
     (red * factor).toInt,
     (green * factor).toInt,
     (blue * factor).toInt))
+
+  def +(other: Color): Color = copy(Color.toArgb(alpha, red + other.red, green + other.green, blue + other.blue))
 }
 
 case object Color {
@@ -23,6 +25,7 @@ case object Color {
   final val LIGHT_GRAY = of(192, 192, 192)
   final val ORANGE = of(255, 200, 0)
   final val MAGENTA = of(255, 0, 255)
+  final val WHITE = of(255, 255, 255)
 
   def of(alpha: Int, red: Int, green: Int, blue: Int): Color = Color(toArgb(alpha, red, green, blue))
 

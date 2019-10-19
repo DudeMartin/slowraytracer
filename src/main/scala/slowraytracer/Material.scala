@@ -1,3 +1,3 @@
 package slowraytracer
 
-case class Material(ambientColor: MaterialColor)
+case class Material(ambientColor: MaterialColor, diffuseColor: MaterialColor = MaterialColor.DISABLED)
