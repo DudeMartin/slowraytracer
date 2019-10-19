@@ -7,10 +7,15 @@ object Application {
     import javax.imageio.ImageIO
     val pixmap = new Pixmap(800, 600)
     val orangeMaterial = Material(MaterialColor(Color.ORANGE, 0.25f), MaterialColor(Color.WHITE, 0.75f))
-    val magentaMaterial = Material(MaterialColor(Color.MAGENTA, 1))
+    val magentaMaterial = Material(
+      MaterialColor(Color.MAGENTA, 0.65f),
+      specularColor = MaterialColor(Color.WHITE, 0.65f),
+      shininess = 5)
     pixmap.fill((_, _) => Color.LIGHT_GRAY)
     renderScene(pixmap, Scene.buildable
-      .withObject(Sphere(Vector3(-2, 0, -8), 4, orangeMaterial))
+      .withObject(Sphere(Vector3(-2, 0, -8), 4, orangeMaterial
+        .copy(specularColor = MaterialColor(Color.WHITE, 0.5f))
+        .copy(shininess = 5)))
       .withObject(Sphere(Vector3(6, -1, -10), 3, orangeMaterial))
       .withObject(Sphere(Vector3(2, 0, -7), 2, magentaMaterial))
       .withPointLight(PointLight(Vector3(-10, 10, 0), 1)))
@@ -42,12 +47,23 @@ object Application {
 
   private def computeColor(intersection: RayIntersection, scene: Scene) = {
     val material = intersection.material
+    val ambientColor = material.ambientColor.color * material.ambientColor.intensity
     val diffuseIntensity = scene.pointLights.foldRight(0f)((light, intensity) => {
       val lightDirection = (light.position - intersection.position).normalize
       intensity + light.intensity * material.diffuseColor.intensity * LightingCalculations.diffuseIntensity(
         lightDirection,
         intersection.normal)
     })
-    material.ambientColor.color * material.ambientColor.intensity + material.diffuseColor.color * diffuseIntensity
+    val diffuseColor = material.diffuseColor.color * diffuseIntensity
+    val specularIntensity = scene.pointLights.foldRight(0f)((light, intensity) => {
+      val lightDirection = (light.position - intersection.position).normalize
+      intensity + light.intensity * material.specularColor.intensity * LightingCalculations.specularIntensity(
+        lightDirection,
+        intersection.normal,
+        intersection.ray.direction,
+        material.shininess)
+    })
+    val specularColor = material.specularColor.color * specularIntensity
+    ambientColor + diffuseColor + specularColor
   }
 }

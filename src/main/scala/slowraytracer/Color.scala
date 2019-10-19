@@ -17,6 +17,8 @@ case class Color private (argb: Int) {
     (blue * factor).toInt))
 
   def +(other: Color): Color = copy(Color.toArgb(alpha, red + other.red, green + other.green, blue + other.blue))
+
+  override def toString: String = s"argb($alpha, $red, $green, $blue)"
 }
 
 case object Color {
@@ -31,5 +33,8 @@ case object Color {
 
   def of(red: Int, green: Int, blue: Int): Color = of(255, red, green, blue)
 
-  private def toArgb(alpha: Int, red: Int, green: Int, blue: Int) = alpha << 24 | red << 16 | green << 8 | blue
+  private def toArgb(alpha: Int, red: Int, green: Int, blue: Int) =
+    normalize(alpha) << 24 | normalize(red) << 16 | normalize(green) << 8 | normalize(blue)
+
+  private def normalize(component: Int): Int = Math.max(0, Math.min(255, component))
 }
