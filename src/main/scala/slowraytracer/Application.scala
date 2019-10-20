@@ -25,9 +25,9 @@ object Application {
   private def renderScene(pixmap: Pixmap, scene: Scene): Unit = {
     val cameraPosition = Vector3.ZERO
     val fovRadians = Math.toRadians(90)
-    val width = pixmap.width()
+    val width = pixmap.width
     val halfWidth = width / 2f
-    val height = pixmap.height()
+    val height = pixmap.height
     val halfHeight = height / 2f
     val directionZ = -halfHeight / Math.tan(fovRadians / 2).toFloat
     for (y <- 0 until height) {

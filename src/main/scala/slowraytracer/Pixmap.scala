@@ -2,16 +2,12 @@ package slowraytracer
 
 import java.awt.image.BufferedImage
 
-class Pixmap(width: Int, height: Int) {
+class Pixmap(val width: Int, val height: Int) {
 
   Validations.assertPositive(width, "width")
   Validations.assertPositive(height, "height")
 
   private val data: Array[Color] = new Array[Color](width * height)
-
-  def width(): Int = width
-
-  def height(): Int = height
 
   def set(x: Int, y: Int, color: Color): Unit = {
     Validations.assertRange(x, 0, width, "X-coordinate")
