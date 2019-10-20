@@ -41,24 +41,28 @@ object Application {
     }
   }
 
-  private def castRay(ray: Ray, scene: Scene) = {
-    scene.objects.flatMap(_.intersections(ray)).minByOption(_.distance)
-  }
+  private def castRay(ray: Ray, scene: Scene) = scene.objects.flatMap(_.intersections(ray)).minByOption(_.distance)
 
   private def computeColor(intersection: RayIntersection, scene: Scene) = {
+    def directionTo(target: Vector3, source: Vector3) = (target - source).normalize
     val material = intersection.material
     val ambientColor = material.ambientColor.color * material.ambientColor.intensity
-    val diffuseIntensity = scene.pointLights.foldRight(0f)((light, intensity) => {
-      val lightDirection = (light.position - intersection.position).normalize
+    val visibleLights = scene.pointLights.filterNot(light => {
+      def distanceTo(target: Vector3, source: Vector3) = (target - source).norm
+      castRay(Ray(intersection.position, directionTo(light.position, intersection.position)), scene)
+        .map(_.position)
+        .map(distanceTo(_, intersection.position))
+        .exists(_ < distanceTo(light.position, intersection.position))
+    })
+    val diffuseIntensity = visibleLights.foldRight(0f)((light, intensity) => {
       intensity + light.intensity * material.diffuseColor.intensity * LightingCalculations.diffuseIntensity(
-        lightDirection,
+        directionTo(light.position, intersection.position),
         intersection.normal)
     })
     val diffuseColor = material.diffuseColor.color * diffuseIntensity
-    val specularIntensity = scene.pointLights.foldRight(0f)((light, intensity) => {
-      val lightDirection = (light.position - intersection.position).normalize
+    val specularIntensity = visibleLights.foldRight(0f)((light, intensity) => {
       intensity + light.intensity * material.specularColor.intensity * LightingCalculations.specularIntensity(
-        lightDirection,
+        directionTo(light.position, intersection.position),
         intersection.normal,
         intersection.ray.direction,
         material.shininess)
