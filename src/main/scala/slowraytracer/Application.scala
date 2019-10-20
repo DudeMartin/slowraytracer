@@ -6,11 +6,11 @@ object Application {
     import java.io.File
     import javax.imageio.ImageIO
     val pixmap = new Pixmap(800, 600)
-    val orangeMaterial = Material(MaterialColor(Color.ORANGE, 0.25f), MaterialColor(Color.WHITE, 0.75f))
+    val orangeMaterial = Material(MaterialColor(Color.ORANGE, 0.55f), MaterialColor(Color.WHITE, 0.75f))
     val magentaMaterial = Material(
       MaterialColor(Color.MAGENTA, 0.65f),
       specularColor = MaterialColor(Color.WHITE, 0.65f),
-      shininess = 5)
+      shininess = 2)
     pixmap.fill((_, _) => Color.LIGHT_GRAY)
     renderScene(pixmap, Scene.buildable
       .withObject(Sphere(Vector3(-2, 0, -8), 4, orangeMaterial
