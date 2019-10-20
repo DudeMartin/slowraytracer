@@ -10,7 +10,7 @@ private[slowraytracer] object LightingCalculations {
     Math.pow(Math.max(0, reflect(lightDirection, normal) * viewDirection), shininess).toFloat
   }
 
-  private def reflect(lightDirection: Vector3, normal: Vector3) = {
+  def reflect(lightDirection: Vector3, normal: Vector3): Vector3 = {
     lightDirection - normal * 2 * (lightDirection * normal)
   }
 }

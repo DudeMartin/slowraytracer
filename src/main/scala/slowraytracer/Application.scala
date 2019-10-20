@@ -9,8 +9,14 @@ object Application {
     val orangeMaterial = Material(MaterialColor(Color.ORANGE, 0.55f), MaterialColor(Color.WHITE, 0.75f))
     val magentaMaterial = Material(
       MaterialColor(Color.MAGENTA, 0.65f),
-      specularColor = MaterialColor(Color.WHITE, 0.65f),
-      shininess = 2)
+      specularColor = MaterialColor(Color.WHITE, 0.5f),
+      shininess = 2,
+      reflectance = 0.5f)
+    val mirrorMaterial = Material(
+      MaterialColor.DISABLED,
+      specularColor = MaterialColor(Color.WHITE, 0.5f),
+      shininess = 10,
+      reflectance = 0.9f)
     pixmap.fill((_, _) => Color.LIGHT_GRAY)
     renderScene(pixmap, Scene.buildable
       .withObject(Sphere(Vector3(-2, 0, -8), 4, orangeMaterial
@@ -18,7 +24,10 @@ object Application {
         .copy(shininess = 5)))
       .withObject(Sphere(Vector3(6, -1, -10), 3, orangeMaterial))
       .withObject(Sphere(Vector3(2, 0, -7), 2, magentaMaterial))
-      .withPointLight(PointLight(Vector3(-10, 10, 0), 1)))
+      .withObject(Sphere(Vector3(5, 4, -7), 2, mirrorMaterial))
+      .withObject(Sphere(Vector3(-6, 4, -6), 1, mirrorMaterial))
+      .withPointLight(PointLight(Vector3(-10, 10, 0), 0.75f))
+      .withPointLight(PointLight(Vector3(5, 0, 0), 0.5f)))
     sys.exit(if (ImageIO.write(pixmap.asBufferedImage, "png", new File("out.png"))) 0 else 1)
   }
 
@@ -43,7 +52,7 @@ object Application {
 
   private def castRay(ray: Ray, scene: Scene) = scene.objects.flatMap(_.intersections(ray)).minByOption(_.distance)
 
-  private def computeColor(intersection: RayIntersection, scene: Scene) = {
+  private def computeColor(intersection: RayIntersection, scene: Scene): Color = {
     def directionTo(target: Vector3, source: Vector3) = (target - source).normalize
     val material = intersection.material
     val ambientColor = material.ambientColor.color * material.ambientColor.intensity
@@ -68,6 +77,9 @@ object Application {
         material.shininess)
     })
     val specularColor = material.specularColor.color * specularIntensity
-    ambientColor + diffuseColor + specularColor
+    val reflectionDirection = LightingCalculations.reflect(intersection.ray.direction, intersection.normal)
+    val reflectionColor = castRay(Ray(intersection.position, reflectionDirection), scene)
+      .map(computeColor(_, scene)).getOrElse(Color.LIGHT_GRAY) * material.reflectance
+    ambientColor + diffuseColor + specularColor + reflectionColor
   }
 }
