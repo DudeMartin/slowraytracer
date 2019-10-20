@@ -50,9 +50,10 @@ object Application {
     }
   }
 
-  private def castRay(ray: Ray, scene: Scene) = scene.objects.flatMap(_.intersections(ray)).minByOption(_.distance)
+  private def castRay(ray: Ray, scene: Scene)(implicit depth: Int = 0) =
+    if (depth > 3) Option.empty else scene.objects.flatMap(_.intersections(ray)).minByOption(_.distance)
 
-  private def computeColor(intersection: RayIntersection, scene: Scene): Color = {
+  private def computeColor(intersection: RayIntersection, scene: Scene)(implicit depth: Int = 0): Color = {
     def directionTo(target: Vector3, source: Vector3) = (target - source).normalize
     val material = intersection.material
     val ambientColor = material.ambientColor.color * material.ambientColor.intensity
@@ -78,8 +79,8 @@ object Application {
     })
     val specularColor = material.specularColor.color * specularIntensity
     val reflectionDirection = LightingCalculations.reflect(intersection.ray.direction, intersection.normal)
-    val reflectionColor = castRay(Ray(intersection.position, reflectionDirection), scene)
-      .map(computeColor(_, scene)).getOrElse(Color.LIGHT_GRAY) * material.reflectance
+    val reflectionColor = castRay(Ray(intersection.position, reflectionDirection), scene)(depth + 1)
+      .map(computeColor(_, scene)(depth + 1)).getOrElse(Color.LIGHT_GRAY) * material.reflectance
     ambientColor + diffuseColor + specularColor + reflectionColor
   }
 }
