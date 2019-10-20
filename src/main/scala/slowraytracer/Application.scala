@@ -6,7 +6,7 @@ object Application {
     import java.io.File
     import javax.imageio.ImageIO
     val pixmap = new Pixmap(800, 600)
-    val orangeMaterial = Material(MaterialColor(Color.ORANGE, 0.55f), MaterialColor(Color.WHITE, 0.75f))
+    val orangeMaterial = Material(MaterialColor(Color.ORANGE, 0.55f), MaterialColor(Color.ORANGE, 0.75f))
     val magentaMaterial = Material(
       MaterialColor(Color.MAGENTA, 0.65f),
       specularColor = MaterialColor(Color.WHITE, 0.5f),
@@ -20,8 +20,7 @@ object Application {
     pixmap.fill((_, _) => Color.LIGHT_GRAY)
     renderScene(pixmap, Scene.buildable
       .withObject(Sphere(Vector3(-2, 0, -8), 4, orangeMaterial
-        .copy(specularColor = MaterialColor(Color.WHITE, 0.5f))
-        .copy(shininess = 5)))
+        .copy(specularColor = MaterialColor(Color.WHITE, 0.5f), shininess = 5)))
       .withObject(Sphere(Vector3(6, -1, -10), 3, orangeMaterial))
       .withObject(Sphere(Vector3(2, 0, -7), 2, magentaMaterial))
       .withObject(Sphere(Vector3(5, 4, -7), 2, mirrorMaterial))
@@ -44,8 +43,7 @@ object Application {
         val directionX = (x + 0.5f) - halfWidth
         val directionY = -(y + 0.5f) + halfHeight
         val viewDirection = Vector3(directionX, directionY, directionZ).normalize
-        val viewRay = Ray(cameraPosition, viewDirection)
-        castRay(viewRay, scene).map(computeColor(_, scene)).foreach(pixmap.set(x, y, _))
+        castRay(Ray(cameraPosition, viewDirection), scene).map(computeColor(_, scene)).foreach(pixmap.set(x, y, _))
       }
     }
   }
@@ -54,6 +52,7 @@ object Application {
     if (depth > 3) Option.empty else scene.objects.flatMap(_.intersections(ray)).minByOption(_.distance)
 
   private def computeColor(intersection: RayIntersection, scene: Scene)(implicit depth: Int = 0): Color = {
+    import LightingCalculations._
     def directionTo(target: Vector3, source: Vector3) = (target - source).normalize
     val material = intersection.material
     val ambientColor = material.ambientColor.color * material.ambientColor.intensity
@@ -64,23 +63,23 @@ object Application {
         .map(distanceTo(_, intersection.position))
         .exists(_ < distanceTo(light.position, intersection.position))
     })
-    val diffuseIntensity = visibleLights.foldRight(0f)((light, intensity) => {
-      intensity + light.intensity * material.diffuseColor.intensity * LightingCalculations.diffuseIntensity(
+    val totalDiffuseIntensity = visibleLights.foldRight(0f)((light, intensity) => {
+      intensity + light.intensity * material.diffuseColor.intensity * diffuseIntensity(
         directionTo(light.position, intersection.position),
         intersection.normal)
     })
-    val diffuseColor = material.diffuseColor.color * diffuseIntensity
-    val specularIntensity = visibleLights.foldRight(0f)((light, intensity) => {
-      intensity + light.intensity * material.specularColor.intensity * LightingCalculations.specularIntensity(
+    val diffuseColor = material.diffuseColor.color * totalDiffuseIntensity
+    val totalSpecularIntensity = visibleLights.foldRight(0f)((light, intensity) => {
+      intensity + light.intensity * material.specularColor.intensity * specularIntensity(
         directionTo(light.position, intersection.position),
         intersection.normal,
         intersection.ray.direction,
         material.shininess)
     })
-    val specularColor = material.specularColor.color * specularIntensity
-    val reflectionDirection = LightingCalculations.reflect(intersection.ray.direction, intersection.normal)
-    val reflectionColor = castRay(Ray(intersection.position, reflectionDirection), scene)(depth + 1)
-      .map(computeColor(_, scene)(depth + 1)).getOrElse(Color.LIGHT_GRAY) * material.reflectance
+    val specularColor = material.specularColor.color * totalSpecularIntensity
+    val reflectedRay = Ray(intersection.position, reflect(intersection.ray.direction, intersection.normal))
+    val reflectionColor = castRay(reflectedRay, scene)(depth + 1).map(computeColor(_, scene)(depth + 1))
+      .getOrElse(Color.LIGHT_GRAY) * material.reflectance
     ambientColor + diffuseColor + specularColor + reflectionColor
   }
 }
