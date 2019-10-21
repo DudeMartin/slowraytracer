@@ -17,6 +17,7 @@ object Application {
       specularColor = MaterialColor(Color.WHITE, 0.5f),
       shininess = 10,
       reflectance = 0.9f)
+    val refractiveMaterial = Material(MaterialColor.DISABLED, refractiveIndex = 1.45f, refractionIntensity = 0.9f)
     pixmap.fill((_, _) => Color.LIGHT_GRAY)
     renderScene(pixmap, Scene.buildable
       .withObject(Sphere(Vector3(-2, 0, -8), 4, orangeMaterial
@@ -25,6 +26,7 @@ object Application {
       .withObject(Sphere(Vector3(2, 0, -7), 2, magentaMaterial))
       .withObject(Sphere(Vector3(5, 4, -7), 2, mirrorMaterial))
       .withObject(Sphere(Vector3(-6, 4, -6), 1, mirrorMaterial))
+      .withObject(Sphere(Vector3(3, 1, -4), 0.5f, refractiveMaterial))
       .withPointLight(PointLight(Vector3(-10, 10, 0), 0.75f))
       .withPointLight(PointLight(Vector3(5, 0, 0), 0.5f)))
     sys.exit(if (ImageIO.write(pixmap.asBufferedImage, "png", new File("out.png"))) 0 else 1)
@@ -80,6 +82,18 @@ object Application {
     val reflectedRay = Ray(intersection.position, reflect(intersection.ray.direction, intersection.normal))
     val reflectionColor = castRay(reflectedRay, scene)(depth + 1).map(computeColor(_, scene)(depth + 1))
       .getOrElse(Color.LIGHT_GRAY) * material.reflectance
-    ambientColor + diffuseColor + specularColor + reflectionColor
+    val refractionColor = refract(intersection.ray.direction, intersection.normal, material.refractiveIndex)
+      .map(refractionDirection => {
+        val refractionEndpoint = if (refractionDirection * intersection.normal < 0) {
+          intersection.position - intersection.normal * 0.001f
+        } else {
+          intersection.position + intersection.normal * 0.001f
+        }
+        Ray(refractionEndpoint, refractionDirection)
+      })
+      .flatMap(castRay(_, scene)(depth + 1))
+      .map(computeColor(_, scene)(depth + 1))
+      .getOrElse(Color.LIGHT_GRAY) * material.refractionIntensity
+    ambientColor + diffuseColor + specularColor + reflectionColor + refractionColor
   }
 }

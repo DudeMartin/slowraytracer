@@ -2,6 +2,8 @@ package slowraytracer
 
 case class Vector3(x: Float, y: Float, z: Float) {
 
+  def unary_- : Vector3 = Vector3(-x, -y, -z)
+
   def +(other: Vector3): Vector3 = Vector3(x + other.x, y + other.y, z + other.z)
 
   def -(other: Vector3): Vector3 = Vector3(x - other.x, y - other.y, z - other.z)
