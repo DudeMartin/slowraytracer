@@ -32,9 +32,11 @@ object Application {
     sys.exit(if (ImageIO.write(pixmap.asBufferedImage, "png", new File("out.png"))) 0 else 1)
   }
 
-  private def renderScene(pixmap: Pixmap, scene: Scene): Unit = {
-    val cameraPosition = Vector3.ZERO
-    val fovRadians = Math.toRadians(90)
+  private def renderScene(
+    pixmap: Pixmap,
+    scene: Scene,
+    cameraPosition: Vector3 = Vector3.ZERO,
+    fovRadians: Float = Math.toRadians(90).toFloat): Unit = {
     val width = pixmap.width
     val halfWidth = width / 2f
     val height = pixmap.height
