@@ -1,6 +1,6 @@
 package slowraytracer
 
-object Application {
+object Raytracer {
 
   def main(arguments: Array[String]): Unit = {
     import java.io.File
@@ -32,7 +32,7 @@ object Application {
     sys.exit(if (ImageIO.write(pixmap.asBufferedImage, "png", new File("out.png"))) 0 else 1)
   }
 
-  private def renderScene(
+  def renderScene(
     pixmap: Pixmap,
     scene: Scene,
     cameraPosition: Vector3 = Vector3.ZERO,
