@@ -32,13 +32,15 @@ class Raytracer(maximumDepth: Int) {
   private def computeColor(intersection: RayIntersection, scene: Scene)(implicit depth: Int = 0): Color = {
     import LightingCalculations._
     def directionTo(target: Vector3) = (target - intersection.position).normalize
-    def offsetPosition(target: Vector3) = {
-      if (target * intersection.normal < 0) {
+    def offsetPosition(targetDirection: Vector3) = {
+      if (targetDirection * intersection.normal < 0) {
         intersection.position - intersection.normal * 0.001f
       } else {
         intersection.position + intersection.normal * 0.001f
       }
     }
+    def computeEnabledColor(intensity: Float)(colorFunction: Float => Color) =
+      if (intensity > 0) colorFunction(intensity) else Color.BLACK
     val material = intersection.material
     val ambientColor = material.ambientColor.color * material.ambientColor.intensity
     val visibleLights = scene.pointLights.filterNot(light => {
@@ -49,37 +51,37 @@ class Raytracer(maximumDepth: Int) {
         .map(distanceTo)
         .exists(_ < distanceTo(light.position))
     })
-    val totalDiffuseIntensity = visibleLights.foldRight(0f)((light, intensity) => {
-      intensity + light.intensity * material.diffuseColor.intensity * diffuseIntensity(
-        directionTo(light.position),
-        intersection.normal)
+    def computeLightingColor(materialColor: MaterialColor)(lightingFunction: PointLight => Float) = {
+      computeEnabledColor(materialColor.intensity) {
+        val totalLightIntensity = visibleLights.foldRight(0f)((light, intensity) => {
+          intensity + light.intensity * lightingFunction(light)
+        })
+        materialColor.color * totalLightIntensity * _
+      }
+    }
+    val diffuseColor = computeLightingColor(material.diffuseColor)(light => {
+      diffuseIntensity(directionTo(light.position), intersection.normal)
     })
-    val diffuseColor = material.diffuseColor.color * totalDiffuseIntensity
-    val totalSpecularIntensity = visibleLights.foldRight(0f)((light, intensity) => {
-      intensity + light.intensity * material.specularColor.intensity * specularIntensity(
+    val specularColor = computeLightingColor(material.specularColor)(light => {
+      specularIntensity(
         directionTo(light.position),
         intersection.normal,
         intersection.ray.direction,
         material.shininess)
     })
-    val specularColor = material.specularColor.color * totalSpecularIntensity
-    val reflectionDirection = reflect(intersection.ray.direction, intersection.normal)
-    val reflectionColor = if (material.reflectance > 0) {
+    val reflectionColor = computeEnabledColor(material.reflectance)(reflectance => {
+      val reflectionDirection = reflect(intersection.ray.direction, intersection.normal)
       castRay(Ray(offsetPosition(reflectionDirection), reflectionDirection), scene)(depth + 1)
         .map(computeColor(_, scene)(depth + 1))
-        .getOrElse(scene.background) * material.reflectance
-    } else {
-      Color.BLACK
-    }
-    val refractionColor = if (material.refractionIntensity > 0) {
+        .getOrElse(scene.background) * reflectance
+    })
+    val refractionColor = computeEnabledColor(material.refractionIntensity)(intensity => {
       refract(intersection.ray.direction, intersection.normal, material.refractiveIndex)
         .map(refractionDirection => Ray(offsetPosition(refractionDirection), refractionDirection))
         .flatMap(castRay(_, scene)(depth + 1))
         .map(computeColor(_, scene)(depth + 1))
-        .getOrElse(scene.background) * material.refractionIntensity
-    } else {
-      Color.BLACK
-    }
+        .getOrElse(scene.background) * intensity
+    })
     ambientColor + diffuseColor + specularColor + reflectionColor + refractionColor
   }
 }
