@@ -57,25 +57,25 @@ object Raytracer {
 
   private def computeColor(intersection: RayIntersection, scene: Scene)(implicit depth: Int = 0): Color = {
     import LightingCalculations._
-    def directionTo(target: Vector3, source: Vector3) = (target - source).normalize
+    def directionTo(target: Vector3) = (target - intersection.position).normalize
     val material = intersection.material
     val ambientColor = material.ambientColor.color * material.ambientColor.intensity
     val visibleLights = scene.pointLights.filterNot(light => {
-      def distanceTo(target: Vector3, source: Vector3) = (target - source).norm
-      castRay(Ray(intersection.position, directionTo(light.position, intersection.position)), scene)
+      def distanceTo(target: Vector3) = (target - intersection.position).norm
+      castRay(Ray(intersection.position, directionTo(light.position)), scene)
         .map(_.position)
-        .map(distanceTo(_, intersection.position))
-        .exists(_ < distanceTo(light.position, intersection.position))
+        .map(distanceTo)
+        .exists(_ < distanceTo(light.position))
     })
     val totalDiffuseIntensity = visibleLights.foldRight(0f)((light, intensity) => {
       intensity + light.intensity * material.diffuseColor.intensity * diffuseIntensity(
-        directionTo(light.position, intersection.position),
+        directionTo(light.position),
         intersection.normal)
     })
     val diffuseColor = material.diffuseColor.color * totalDiffuseIntensity
     val totalSpecularIntensity = visibleLights.foldRight(0f)((light, intensity) => {
       intensity + light.intensity * material.specularColor.intensity * specularIntensity(
-        directionTo(light.position, intersection.position),
+        directionTo(light.position),
         intersection.normal,
         intersection.ray.direction,
         material.shininess)
