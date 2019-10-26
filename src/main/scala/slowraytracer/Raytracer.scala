@@ -1,36 +1,8 @@
 package slowraytracer
 
-object Raytracer {
+class Raytracer(maximumDepth: Int) {
 
-  def main(arguments: Array[String]): Unit = {
-    import java.io.File
-    import javax.imageio.ImageIO
-    val pixmap = new Pixmap(800, 600)
-    val orangeMaterial = Material(MaterialColor(Color.ORANGE, 0.55f), MaterialColor(Color.ORANGE, 0.75f))
-    val magentaMaterial = Material(
-      MaterialColor(Color.MAGENTA, 0.65f),
-      specularColor = MaterialColor(Color.WHITE, 0.5f),
-      shininess = 2,
-      reflectance = 0.5f)
-    val mirrorMaterial = Material(
-      MaterialColor.DISABLED,
-      specularColor = MaterialColor(Color.WHITE, 0.5f),
-      shininess = 10,
-      reflectance = 0.9f)
-    val refractiveMaterial = Material(MaterialColor.DISABLED, refractiveIndex = 1.45f, refractionIntensity = 0.9f)
-    renderScene(pixmap, Scene.buildable
-      .withBackground(Color.LIGHT_GRAY)
-      .withObject(Sphere(Vector3(-2, 0, -8), 4, orangeMaterial
-        .copy(specularColor = MaterialColor(Color.WHITE, 0.5f), shininess = 5)))
-      .withObject(Sphere(Vector3(6, -1, -10), 3, orangeMaterial))
-      .withObject(Sphere(Vector3(2, 0, -7), 2, magentaMaterial))
-      .withObject(Sphere(Vector3(5, 4, -7), 2, mirrorMaterial))
-      .withObject(Sphere(Vector3(-6, 4, -6), 1, mirrorMaterial))
-      .withObject(Sphere(Vector3(3, 1, -4), 0.5f, refractiveMaterial))
-      .withPointLight(PointLight(Vector3(-10, 10, 0), 0.75f))
-      .withPointLight(PointLight(Vector3(5, 0, 0), 0.5f)))
-    sys.exit(if (ImageIO.write(pixmap.asBufferedImage, "png", new File("out.png"))) 0 else 1)
-  }
+  Validations.assertNonNegative(maximumDepth, "maximum depth")
 
   def renderScene(
     pixmap: Pixmap,
@@ -55,7 +27,7 @@ object Raytracer {
   }
 
   private def castRay(ray: Ray, scene: Scene)(implicit depth: Int = 0) =
-    if (depth > 3) Option.empty else scene.objects.flatMap(_.intersections(ray)).minByOption(_.distance)
+    if (depth > maximumDepth) Option.empty else scene.objects.flatMap(_.intersections(ray)).minByOption(_.distance)
 
   private def computeColor(intersection: RayIntersection, scene: Scene)(implicit depth: Int = 0): Color = {
     import LightingCalculations._
@@ -109,5 +81,38 @@ object Raytracer {
       Color.BLACK
     }
     ambientColor + diffuseColor + specularColor + reflectionColor + refractionColor
+  }
+}
+
+object Raytracer {
+
+  def main(arguments: Array[String]): Unit = {
+    import java.io.File
+    import javax.imageio.ImageIO
+    val pixmap = new Pixmap(800, 600)
+    val orangeMaterial = Material(MaterialColor(Color.ORANGE, 0.55f), MaterialColor(Color.ORANGE, 0.75f))
+    val magentaMaterial = Material(
+      MaterialColor(Color.MAGENTA, 0.65f),
+      specularColor = MaterialColor(Color.WHITE, 0.5f),
+      shininess = 2,
+      reflectance = 0.5f)
+    val mirrorMaterial = Material(
+      MaterialColor.DISABLED,
+      specularColor = MaterialColor(Color.WHITE, 0.5f),
+      shininess = 10,
+      reflectance = 0.9f)
+    val refractiveMaterial = Material(MaterialColor.DISABLED, refractiveIndex = 1.45f, refractionIntensity = 0.9f)
+    new Raytracer(3).renderScene(pixmap, Scene.buildable
+      .withBackground(Color.LIGHT_GRAY)
+      .withObject(Sphere(Vector3(-2, 0, -8), 4, orangeMaterial
+        .copy(specularColor = MaterialColor(Color.WHITE, 0.5f), shininess = 5)))
+      .withObject(Sphere(Vector3(6, -1, -10), 3, orangeMaterial))
+      .withObject(Sphere(Vector3(2, 0, -7), 2, magentaMaterial))
+      .withObject(Sphere(Vector3(5, 4, -7), 2, mirrorMaterial))
+      .withObject(Sphere(Vector3(-6, 4, -6), 1, mirrorMaterial))
+      .withObject(Sphere(Vector3(3, 1, -4), 0.5f, refractiveMaterial))
+      .withPointLight(PointLight(Vector3(-10, 10, 0), 0.75f))
+      .withPointLight(PointLight(Vector3(5, 0, 0), 0.5f)))
+    sys.exit(if (ImageIO.write(pixmap.asBufferedImage, "png", new File("out.png"))) 0 else 1)
   }
 }

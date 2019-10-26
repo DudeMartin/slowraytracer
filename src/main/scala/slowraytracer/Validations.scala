@@ -8,6 +8,12 @@ object Validations {
     }
   }
 
+  def assertNonNegative(value: Int, valueName: String): Unit = {
+    if (value < 0) {
+      throw new IllegalArgumentException(s"The $valueName must be non-negative.")
+    }
+  }
+
   def assertRange(value: Int, startInclusive: Int, endExclusive: Int, valueName: String): Unit = {
     if (value < startInclusive || value >= endExclusive) {
       throw new IllegalArgumentException(

@@ -16,6 +16,18 @@ class ValidationsSpec extends FlatSpec {
     assertResult(()) { Validations.assertPositive(1, "value") }
   }
 
+  "assertNonNegative" should "throw IllegalArgumentException when value is negative" in {
+    assertThrows[IllegalArgumentException] { Validations.assertNonNegative(-1, "value") }
+  }
+
+  "assertNonNegative" should "return nothing when value is 0" in {
+    assertResult(()) { Validations.assertNonNegative(0, "value") }
+  }
+
+  "assertNonNegative" should "return nothing when value is positive" in {
+    assertResult(()) { Validations.assertNonNegative(1, "value") }
+  }
+
   "assertRange" should "throw IllegalArgumentException when value is out of range" in {
     val startInclusive = -2
     val endExclusive = 3
