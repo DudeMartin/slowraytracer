@@ -90,14 +90,22 @@ object Raytracer {
     })
     val specularColor = material.specularColor.color * totalSpecularIntensity
     val reflectionDirection = reflect(intersection.ray.direction, intersection.normal)
-    val reflectionColor = castRay(Ray(offsetPosition(reflectionDirection), reflectionDirection), scene)(depth + 1)
-      .map(computeColor(_, scene)(depth + 1))
-      .getOrElse(Color.LIGHT_GRAY) * material.reflectance
-    val refractionColor = refract(intersection.ray.direction, intersection.normal, material.refractiveIndex)
-      .map(refractionDirection => Ray(offsetPosition(refractionDirection), refractionDirection))
-      .flatMap(castRay(_, scene)(depth + 1))
-      .map(computeColor(_, scene)(depth + 1))
-      .getOrElse(Color.LIGHT_GRAY) * material.refractionIntensity
+    val reflectionColor = if (material.reflectance > 0) {
+      castRay(Ray(offsetPosition(reflectionDirection), reflectionDirection), scene)(depth + 1)
+        .map(computeColor(_, scene)(depth + 1))
+        .getOrElse(Color.LIGHT_GRAY) * material.reflectance
+    } else {
+      Color.BLACK
+    }
+    val refractionColor = if (material.refractionIntensity > 0) {
+      refract(intersection.ray.direction, intersection.normal, material.refractiveIndex)
+        .map(refractionDirection => Ray(offsetPosition(refractionDirection), refractionDirection))
+        .flatMap(castRay(_, scene)(depth + 1))
+        .map(computeColor(_, scene)(depth + 1))
+        .getOrElse(Color.LIGHT_GRAY) * material.refractionIntensity
+    } else {
+      Color.BLACK
+    }
     ambientColor + diffuseColor + specularColor + reflectionColor + refractionColor
   }
 }
