@@ -18,8 +18,8 @@ object Raytracer {
       shininess = 10,
       reflectance = 0.9f)
     val refractiveMaterial = Material(MaterialColor.DISABLED, refractiveIndex = 1.45f, refractionIntensity = 0.9f)
-    pixmap.fill((_, _) => Color.LIGHT_GRAY)
     renderScene(pixmap, Scene.buildable
+      .withBackground(Color.LIGHT_GRAY)
       .withObject(Sphere(Vector3(-2, 0, -8), 4, orangeMaterial
         .copy(specularColor = MaterialColor(Color.WHITE, 0.5f), shininess = 5)))
       .withObject(Sphere(Vector3(6, -1, -10), 3, orangeMaterial))
@@ -46,8 +46,10 @@ object Raytracer {
       for (x <- 0 until width) {
         val directionX = (x + 0.5f) - halfWidth
         val directionY = -(y + 0.5f) + halfHeight
-        val viewDirection = Vector3(directionX, directionY, directionZ).normalize
-        castRay(Ray(cameraPosition, viewDirection), scene).map(computeColor(_, scene)).foreach(pixmap.set(x, y, _))
+        val pixelColor = castRay(Ray(cameraPosition, Vector3(directionX, directionY, directionZ).normalize), scene)
+          .map(computeColor(_, scene))
+          .getOrElse(scene.background)
+        pixmap.set(x, y, pixelColor)
       }
     }
   }
@@ -93,7 +95,7 @@ object Raytracer {
     val reflectionColor = if (material.reflectance > 0) {
       castRay(Ray(offsetPosition(reflectionDirection), reflectionDirection), scene)(depth + 1)
         .map(computeColor(_, scene)(depth + 1))
-        .getOrElse(Color.LIGHT_GRAY) * material.reflectance
+        .getOrElse(scene.background) * material.reflectance
     } else {
       Color.BLACK
     }
@@ -102,7 +104,7 @@ object Raytracer {
         .map(refractionDirection => Ray(offsetPosition(refractionDirection), refractionDirection))
         .flatMap(castRay(_, scene)(depth + 1))
         .map(computeColor(_, scene)(depth + 1))
-        .getOrElse(Color.LIGHT_GRAY) * material.refractionIntensity
+        .getOrElse(scene.background) * material.refractionIntensity
     } else {
       Color.BLACK
     }

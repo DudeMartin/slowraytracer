@@ -2,6 +2,8 @@ package slowraytracer
 
 trait Scene {
 
+  def background: Color
+
   def objects: Seq[SceneObject]
 
   def pointLights: Seq[PointLight]
@@ -9,16 +11,17 @@ trait Scene {
 
 object Scene {
 
-  final case class BuildableScene private (objects: Seq[SceneObject], pointLights: Seq[PointLight]) extends Scene {
+  final case class BuildableScene private (
+    background: Color,
+    objects: Seq[SceneObject],
+    pointLights: Seq[PointLight]) extends Scene {
 
-    def withObject(sceneObject: SceneObject): BuildableScene = {
-      copy(objects :+ sceneObject)
-    }
+    def withBackground(background: Color): BuildableScene = copy(background)
 
-    def withPointLight(pointLight: PointLight): BuildableScene = {
-      copy(pointLights = pointLights :+ pointLight)
-    }
+    def withObject(sceneObject: SceneObject): BuildableScene = copy(objects = objects :+ sceneObject)
+
+    def withPointLight(pointLight: PointLight): BuildableScene = copy(pointLights = pointLights :+ pointLight)
   }
 
-  def buildable: BuildableScene = BuildableScene(Seq.empty, Seq.empty)
+  def buildable: BuildableScene = BuildableScene(Color.BLACK, Seq.empty, Seq.empty)
 }
