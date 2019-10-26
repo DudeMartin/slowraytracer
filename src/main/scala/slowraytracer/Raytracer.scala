@@ -58,11 +58,19 @@ object Raytracer {
   private def computeColor(intersection: RayIntersection, scene: Scene)(implicit depth: Int = 0): Color = {
     import LightingCalculations._
     def directionTo(target: Vector3) = (target - intersection.position).normalize
+    def offsetPosition(target: Vector3) = {
+      if (target * intersection.normal < 0) {
+        intersection.position - intersection.normal * 0.001f
+      } else {
+        intersection.position + intersection.normal * 0.001f
+      }
+    }
     val material = intersection.material
     val ambientColor = material.ambientColor.color * material.ambientColor.intensity
     val visibleLights = scene.pointLights.filterNot(light => {
       def distanceTo(target: Vector3) = (target - intersection.position).norm
-      castRay(Ray(intersection.position, directionTo(light.position)), scene)
+      val lightDirection = directionTo(light.position)
+      castRay(Ray(offsetPosition(lightDirection), lightDirection), scene)
         .map(_.position)
         .map(distanceTo)
         .exists(_ < distanceTo(light.position))
@@ -81,18 +89,12 @@ object Raytracer {
         material.shininess)
     })
     val specularColor = material.specularColor.color * totalSpecularIntensity
-    val reflectedRay = Ray(intersection.position, reflect(intersection.ray.direction, intersection.normal))
-    val reflectionColor = castRay(reflectedRay, scene)(depth + 1).map(computeColor(_, scene)(depth + 1))
+    val reflectionDirection = reflect(intersection.ray.direction, intersection.normal)
+    val reflectionColor = castRay(Ray(offsetPosition(reflectionDirection), reflectionDirection), scene)(depth + 1)
+      .map(computeColor(_, scene)(depth + 1))
       .getOrElse(Color.LIGHT_GRAY) * material.reflectance
     val refractionColor = refract(intersection.ray.direction, intersection.normal, material.refractiveIndex)
-      .map(refractionDirection => {
-        val refractionEndpoint = if (refractionDirection * intersection.normal < 0) {
-          intersection.position - intersection.normal * 0.001f
-        } else {
-          intersection.position + intersection.normal * 0.001f
-        }
-        Ray(refractionEndpoint, refractionDirection)
-      })
+      .map(refractionDirection => Ray(offsetPosition(refractionDirection), refractionDirection))
       .flatMap(castRay(_, scene)(depth + 1))
       .map(computeColor(_, scene)(depth + 1))
       .getOrElse(Color.LIGHT_GRAY) * material.refractionIntensity
