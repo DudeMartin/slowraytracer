@@ -46,11 +46,21 @@ class PixmapSpec extends FlatSpec {
 
   "fill then asBufferedImage" should "return a BufferedImage whose values were set by the fill operation" in {
     val pixmap = new Pixmap(2, 2)
-    pixmap.fill((x, y) => if (x % 2 == 0) Color.ORANGE else Color.LIGHT_GRAY)
+    pixmap.fill((x, _) => if (x % 2 == 0) Color.ORANGE else Color.LIGHT_GRAY)
     val bufferedImage = pixmap.asBufferedImage
     assertResult(Color.ORANGE.argb) { bufferedImage.getRGB(0, 0) }
     assertResult(Color.LIGHT_GRAY.argb) { bufferedImage.getRGB(1, 0) }
     assertResult(Color.ORANGE.argb) { bufferedImage.getRGB(0, 1) }
     assertResult(Color.LIGHT_GRAY.argb) { bufferedImage.getRGB(1, 1) }
+  }
+
+  "asBufferedImage" should "return a completely black BufferedImage when the pixmap is new" in {
+    val pixmap = new Pixmap(3, 3)
+    val bufferedImage = pixmap.asBufferedImage
+    for (y <- 0 until pixmap.height) {
+      for (x <- 0 until pixmap.width) {
+        assertResult(Color.BLACK.argb) { bufferedImage.getRGB(x, y) }
+      }
+    }
   }
 }

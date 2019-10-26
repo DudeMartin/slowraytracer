@@ -7,7 +7,7 @@ class Pixmap(val width: Int, val height: Int) {
   Validations.assertPositive(width, "width")
   Validations.assertPositive(height, "height")
 
-  private val data: Array[Color] = new Array[Color](width * height)
+  private val data: Array[Color] = Array.fill(width * height)(Color.BLACK)
 
   def set(x: Int, y: Int, color: Color): Unit = {
     Validations.assertRange(x, 0, width, "X-coordinate")
