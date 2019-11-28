@@ -10,13 +10,9 @@ case class Color private (argb: Int) {
 
   def blue: Int = argb & 0xff
 
-  def *(factor: Float): Color = copy(Color.toArgb(
-    alpha,
-    (red * factor).toInt,
-    (green * factor).toInt,
-    (blue * factor).toInt))
+  def *(factor: Float): Color = Color.of(alpha, (red * factor).toInt, (green * factor).toInt, (blue * factor).toInt)
 
-  def +(other: Color): Color = copy(Color.toArgb(alpha, red + other.red, green + other.green, blue + other.blue))
+  def +(other: Color): Color = Color.of(alpha, red + other.red, green + other.green, blue + other.blue)
 
   override def toString: String = s"argb($alpha, $red, $green, $blue)"
 }

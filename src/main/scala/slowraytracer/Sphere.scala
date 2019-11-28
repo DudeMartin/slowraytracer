@@ -2,7 +2,7 @@ package slowraytracer
 
 case class Sphere(center: Vector3, radius: Float, material: Material) extends SceneObject {
 
-  override def intersections(ray: Ray): Seq[RayIntersection] = {
+  override def intersections(ray: Ray): Iterable[RayIntersection] = {
     val L = center - ray.endpoint
     val tca = L * ray.direction.normalize
     if (tca < 0) {

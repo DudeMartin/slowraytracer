@@ -21,5 +21,5 @@ case class Vector3(x: Float, y: Float, z: Float) {
 
 case object Vector3 {
 
-  final val ZERO: Vector3 = Vector3(0, 0, 0)
+  final val ZERO = Vector3(0, 0, 0)
 }

@@ -4,6 +4,10 @@ import org.scalatest.FlatSpec
 
 class Vector3Spec extends FlatSpec {
 
+  "- (negate)" should "return a vector whose components have been negated" in {
+    assertResult(Vector3(-1, -2, -3)) { -Vector3(1, 2, 3) }
+  }
+
   "+" should "return a vector whose components are the corresponding sums of the two vectors" in {
     assertResult(Vector3(1, 2, 3)) { Vector3(1, 2, 3) + Vector3.ZERO }
     assertResult(Vector3(2, 4, 6)) { Vector3(1, 2, 3) + Vector3(1, 2, 3) }
