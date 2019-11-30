@@ -1,8 +1,7 @@
 package slowraytracer
 
 case class Material(
-  ambientColor: MaterialColor,
-  diffuseColor: MaterialColor = MaterialColor.DISABLED,
+  diffuseColor: MaterialColor,
   specularColor: MaterialColor = MaterialColor.DISABLED,
   shininess: Float = 0,
   reflectance: Float = 0,

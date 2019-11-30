@@ -6,7 +6,7 @@ trait Scene {
 
   def objects: Seq[SceneObject]
 
-  def pointLights: Seq[PointLight]
+  def lights: Seq[Light]
 }
 
 object Scene {
@@ -14,13 +14,13 @@ object Scene {
   final case class BuildableScene private (
     background: Color,
     objects: Seq[SceneObject],
-    pointLights: Seq[PointLight]) extends Scene {
+    lights: Seq[Light]) extends Scene {
 
     def withBackground(background: Color): BuildableScene = copy(background)
 
     def withObject(sceneObject: SceneObject): BuildableScene = copy(objects = objects :+ sceneObject)
 
-    def withPointLight(pointLight: PointLight): BuildableScene = copy(pointLights = pointLights :+ pointLight)
+    def withLight(light: Light): BuildableScene = copy(lights = lights :+ light)
   }
 
   def buildable: BuildableScene = BuildableScene(Color.BLACK, Seq.empty, Seq.empty)
