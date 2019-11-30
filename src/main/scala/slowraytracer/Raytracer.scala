@@ -1,5 +1,7 @@
 package slowraytracer
 
+import scala.collection.mutable.ArrayBuffer
+
 class Raytracer(maximumDepth: Int) {
 
   Validations.assertNonNegative(maximumDepth, "maximum depth")
@@ -37,38 +39,32 @@ class Raytracer(maximumDepth: Int) {
         intersection.position + intersection.normal * 0.001f
       }
     }
+    val colors = ArrayBuffer.empty[Color]
     val material = intersection.material
-    val reflectionColor = if (material.reflectance > 0) {
+    if (material.reflectance > 0) {
       val reflectionDirection = LightingCalculations.reflect(intersection.ray.direction, intersection.normal)
-      castRay(Ray(offsetPosition(reflectionDirection), reflectionDirection), scene)(depth + 1)
+      colors += castRay(Ray(offsetPosition(reflectionDirection), reflectionDirection), scene)(depth + 1)
         .map(computeColor(_, scene)(depth + 1))
         .getOrElse(scene.background) * material.reflectance
-    } else {
-      Color.BLACK
     }
-    val refractionColor = if (material.refractionIntensity > 0) {
-      LightingCalculations.refract(intersection.ray.direction, intersection.normal, material.refractiveIndex)
+    if (material.refractionIntensity > 0) {
+      colors += LightingCalculations.refract(intersection.ray.direction, intersection.normal, material.refractiveIndex)
         .map(refractionDirection => Ray(offsetPosition(refractionDirection), refractionDirection))
         .flatMap(castRay(_, scene)(depth + 1))
         .map(computeColor(_, scene)(depth + 1))
         .getOrElse(scene.background) * material.refractionIntensity
-    } else {
-      Color.BLACK
     }
-    val visibleLights = scene.lights.filter(light => {
-      light match {
-        case pointLight: PointLight =>
-          def distanceTo(target: Vector3) = (target - intersection.position).norm
-          val lightDirection = (pointLight.position - intersection.position).normalize
-          !castRay(Ray(offsetPosition(lightDirection), lightDirection), scene)
-            .map(_.position)
-            .map(distanceTo)
-            .exists(_ < distanceTo(pointLight.position))
-        case _ =>
-          true
-      }
+    val visibleLights = scene.lights.filter(_ match {
+      case pointLight: PointLight =>
+        def distanceTo(target: Vector3) = (target - intersection.position).norm
+        val lightDirection = (pointLight.position - intersection.position).normalize
+        !castRay(Ray(offsetPosition(lightDirection), lightDirection), scene)
+          .map(_.position)
+          .map(distanceTo)
+          .exists(_ < distanceTo(pointLight.position))
+      case _ => true
     })
-    visibleLights.map(_.reflect(intersection)).foldRight(Color.BLACK)(_ + _) + reflectionColor + refractionColor
+    colors.appendAll(visibleLights.map(_.reflect(intersection))).foldRight(Color.BLACK)(_ + _)
   }
 }
 
