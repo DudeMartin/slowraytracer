@@ -8,14 +8,17 @@ private[slowraytracer] class AveragingColor {
   private var blueValue = 0
   private var count = 0
 
-  def +=(other: Color): AveragingColor = {
+  def +=(other: Color): Unit = {
     alphaValue += other.alpha
     redValue += other.red
     greenValue += other.green
     blueValue += other.blue
     count += 1
-    this
   }
 
-  def averaged: Color = Color.of(alphaValue / count, redValue / count, greenValue / count, blueValue / count)
+  def averaged: Color = if (count == 0) {
+    Color.BLACK
+  } else {
+    Color.of(alphaValue / count, redValue / count, greenValue / count, blueValue / count)
+  }
 }
