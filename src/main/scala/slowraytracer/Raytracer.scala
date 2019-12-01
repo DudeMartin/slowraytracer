@@ -10,7 +10,8 @@ class Raytracer(maximumDepth: Int) {
     pixmap: Pixmap,
     scene: Scene,
     cameraPosition: Vector3 = Vector3.ZERO,
-    fovRadians: Float = Math.toRadians(90).toFloat): Unit = {
+    fovRadians: Float = Math.toRadians(90).toFloat,
+    sampleCount: Int = 1000): Unit = {
     val width = pixmap.width
     val halfWidth = width / 2f
     val height = pixmap.height
@@ -20,9 +21,14 @@ class Raytracer(maximumDepth: Int) {
       for (x <- 0 until width) {
         val directionX = (x + 0.5f) - halfWidth
         val directionY = -(y + 0.5f) + halfHeight
-        val pixelColor = castRay(Ray(cameraPosition, Vector3(directionX, directionY, directionZ).normalize), scene)
-          .map(computeColor(_, scene))
-          .getOrElse(scene.background)
+        val viewRay = Ray(cameraPosition, Vector3(directionX, directionY, directionZ).normalize)
+        val pixelColor = castRay(viewRay, scene).map(ray => {
+          val averagingColor = new AveragingColor
+          for (_ <- 0 until sampleCount) {
+            averagingColor += computeColor(ray, scene)
+          }
+          averagingColor.averaged
+        }).getOrElse(scene.background)
         pixmap.set(x, y, pixelColor)
       }
     }
@@ -54,7 +60,7 @@ class Raytracer(maximumDepth: Int) {
         .map(computeColor(_, scene)(depth + 1))
         .getOrElse(scene.background) * material.refractionIntensity
     }
-    val visibleLights = scene.lights.filter(_ match {
+    colors ++= scene.lights.filter(_ match {
       case pointLight: PointLight =>
         def distanceTo(target: Vector3) = (target - intersection.position).norm
         val lightDirection = (pointLight.position - intersection.position).normalize
@@ -63,8 +69,10 @@ class Raytracer(maximumDepth: Int) {
           .map(distanceTo)
           .exists(_ < distanceTo(pointLight.position))
       case _ => true
-    })
-    colors.appendAll(visibleLights.map(_.reflect(intersection))).foldRight(Color.BLACK)(_ + _)
+    }).map(_.reflect(intersection))
+    val scatterRay = Ray(intersection.position, LightingCalculations.randomSurfaceNormalHemisphere(intersection.normal))
+    colors ++= castRay(scatterRay, scene)(depth + 1).map(computeColor(_, scene)(depth + 1))
+    colors.foldRight(Color.BLACK)(_ + _)
   }
 }
 
