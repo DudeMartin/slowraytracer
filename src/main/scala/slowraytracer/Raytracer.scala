@@ -1,5 +1,7 @@
 package slowraytracer
 
+import java.util.concurrent.{Executors, TimeUnit}
+
 import scala.collection.mutable.ArrayBuffer
 
 class Raytracer(maximumDepth: Int) {
@@ -12,6 +14,7 @@ class Raytracer(maximumDepth: Int) {
     cameraPosition: Vector3 = Vector3.ZERO,
     fovRadians: Float = Math.toRadians(90).toFloat,
     sampleCount: Int = 1000): Unit = {
+    val threadPool = Executors.newFixedThreadPool(Runtime.getRuntime.availableProcessors())
     val width = pixmap.width
     val halfWidth = width / 2f
     val height = pixmap.height
@@ -19,19 +22,23 @@ class Raytracer(maximumDepth: Int) {
     val directionZ = -halfHeight / Math.tan(fovRadians / 2).toFloat
     for (y <- 0 until height) {
       for (x <- 0 until width) {
-        val directionX = (x + 0.5f) - halfWidth
-        val directionY = -(y + 0.5f) + halfHeight
-        val viewRay = Ray(cameraPosition, Vector3(directionX, directionY, directionZ).normalize)
-        val pixelColor = castRay(viewRay, scene).map(ray => {
-          val averagingColor = new AveragingColor
-          for (_ <- 0 until sampleCount) {
-            averagingColor += computeColor(ray, scene)
-          }
-          averagingColor.averaged
-        }).getOrElse(scene.background)
-        pixmap.set(x, y, pixelColor)
+        threadPool.execute(() => {
+          val directionX = (x + 0.5f) - halfWidth
+          val directionY = -(y + 0.5f) + halfHeight
+          val viewRay = Ray(cameraPosition, Vector3(directionX, directionY, directionZ).normalize)
+          val pixelColor = castRay(viewRay, scene).map(ray => {
+            val averagingColor = new AveragingColor
+            for (_ <- 0 until sampleCount) {
+              averagingColor += computeColor(ray, scene)
+            }
+            averagingColor.averaged
+          }).getOrElse(scene.background)
+          pixmap.set(x, y, pixelColor)
+        })
       }
     }
+    threadPool.shutdown()
+    threadPool.awaitTermination(Long.MaxValue, TimeUnit.SECONDS)
   }
 
   private def castRay(ray: Ray, scene: Scene)(implicit depth: Int = 0) =
